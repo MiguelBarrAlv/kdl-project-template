@@ -725,3 +725,9 @@ $RECYCLE.BIN/
 
 # CUSTOM
 !lib/
+
+# Python version
+.python-version
+
+# Azure Config 
+*config_azure.json

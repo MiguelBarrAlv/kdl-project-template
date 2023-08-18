@@ -63,10 +63,11 @@ def train_classifiers(
     """
     # Unpack config:
     random_seed = int(config["training"]["random_seed"])
-    workspace_dir = Path(config["paths"]["workspace_dir"])
+    # workspace_dir = Path(config["paths"]["workspace_dir"])
     dir_processed = config["paths"]["dir_processed"]
     dir_artifacts = Path(config["paths"]["artifacts_temp"])
-    full_dir_artifacts = workspace_dir / dir_artifacts
+    #full_dir_artifacts = workspace_dir / dir_artifacts
+    full_dir_artifacts = dir_artifacts # NOTE: Modified for local testing
     filepath_conf_matrix = full_dir_artifacts / "confusion_matrix.png"
     mlflow_experiment = config["mlflow"]["mlflow_experiment"]
 

@@ -1,19 +1,17 @@
 """
 A densely connected neural network for binary classification and its usage on the example dataset
 """
-
-from configparser import ConfigParser
-from pathlib import Path
-
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sklearn.metrics import confusion_matrix
 
+from configparser import ConfigParser
+from sklearn.metrics import confusion_matrix
 from lab.processes.prepare_data.cancer_data import load_data_splits_as_dataloader
 from lib.pytorch import train_and_validate, val_loop
 from lib.viz import plot_confusion_matrix, plot_training_history
+from pathlib import Path
 
 
 class DenseNN(nn.Module):
@@ -84,8 +82,11 @@ def train_densenet(
     learning_rate = float(config["training"]["lr"])
     workspace_dir = Path(config["paths"]["workspace_dir"])
     dir_processed = config["paths"]["dir_processed"]
+    print(dir_processed)
     dir_artifacts = Path(config["paths"]["artifacts_temp"])
-    full_dir_artifacts = workspace_dir / dir_artifacts
+    # full_dir_artifacts = workspace_dir / dir_artifacts # NOTE: Commented for local testing
+    full_dir_artifacts = Path(config["paths"]["workspace_dir"]) / dir_artifacts
+    # full_dir_artifacts = dir_artifacts # NOTE: Added for local testing
     filepath_conf_matrix = full_dir_artifacts / config["filenames"]["fname_conf_mat"]
     filepath_model = full_dir_artifacts / config["filenames"]["fname_model"]
     filepath_training_history = (
@@ -113,7 +114,7 @@ def train_densenet(
         net = DenseNN()
         loss_fn = nn.BCELoss()
         optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
-
+        
         # Train and validate
         net, df_history, _ = train_and_validate(
             model=net,
@@ -124,7 +125,6 @@ def train_densenet(
             epochs=epochs,
             filepath_model=filepath_model,
         )
-
         # Load best version
         net = DenseNN()
         net.load_state_dict(torch.load(filepath_model))

@@ -12,6 +12,7 @@ from lab.processes.train_dnn_pytorch.densenet import train_densenet
 from lib.testing import get_mlflow_stub
 
 vscode_config = configparser.ConfigParser()
+# vscode_config.read("lab/processes/config_test.ini") NOTE: Commented for local testing
 vscode_config.read("lab/processes/config_test.ini")
 
 

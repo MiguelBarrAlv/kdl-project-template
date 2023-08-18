@@ -2,17 +2,17 @@
 Integration test for train_standard_classifiers
 """
 
+import pytest
 import configparser
 import os
+
 from pathlib import Path
-
-import pytest
-
 from lab.processes.train_standard_classifiers.classifiers import train_classifiers
 from lib.testing import get_mlflow_stub
 
 vscode_config = configparser.ConfigParser()
-vscode_config.read("lab/processes/config_test.ini")
+# vscode_config.read("lab/processes/config_test.ini") NOTE: Commented for local testing
+vscode_config.read("lab/processes/config_azure_test.ini")
 
 
 @pytest.mark.integration

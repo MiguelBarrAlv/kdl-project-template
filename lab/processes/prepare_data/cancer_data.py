@@ -1,19 +1,21 @@
 """
 Functions for preparing the breast cancer dataset for training and validating ML algorithms
 """
-
-from pathlib import Path
-from typing import Tuple, Union
-
 import numpy as np
+import os
 import pandas as pd
 import torch
+
+from azureml.core import Workspace, Datastore
+from dotenv import load_dotenv
 from pandas import DataFrame, Series
+from pathlib import Path
+from ..azure.services import AzureDatastoreManager
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from typing import Tuple, Union
 from torch.utils.data import DataLoader
-
 from lib.pytorch import create_dataloader
 
 RANDOM_STATE = 42
@@ -58,6 +60,7 @@ def prepare_cancer_data(dir_output: str) -> None:
     Returns:
         (None)
     """
+    load_dotenv() 
     Path(dir_output).mkdir(exist_ok=True)
 
     # Load digit data
@@ -79,6 +82,10 @@ def prepare_cancer_data(dir_output: str) -> None:
     np.save(str(Path(dir_output) / "y_val.npy"), y_val.to_numpy())
     np.save(str(Path(dir_output) / "X_test.npy"), X_test.to_numpy())
     np.save(str(Path(dir_output) / "y_test.npy"), y_test.to_numpy())
+
+    # Azure ML
+    azure_data_connection = AzureDatastoreManager()
+    azure_data_connection.upload_data(dir_output)
 
 
 def load_data_splits(

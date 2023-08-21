@@ -1,24 +1,24 @@
 """
 Functions for instantiating and training traditional ML classifiers
 """
-from configparser import ConfigParser
-from pathlib import Path
-from types import ModuleType
-from typing import Union
-
 import numpy as np
+
+from configparser import ConfigParser
+from lab.processes.azure.services import MLFlowManager
 from mock import MagicMock
 from sklearn.ensemble import (
     AdaBoostClassifier,
     GradientBoostingClassifier,
     RandomForestClassifier,
 )
+from pathlib import Path
+from types import ModuleType
+from typing import Union
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-
 from lab.processes.prepare_data.cancer_data import load_data_splits
 from lib.viz import plot_confusion_matrix
 
@@ -44,16 +44,15 @@ def create_classifiers() -> dict:
 
 
 def train_classifiers(
-    mlflow: Union[ModuleType, MagicMock],
-    config: Union[ConfigParser, dict],
-    mlflow_url: str,
+    manager: MLFlowManager,
+    config: ConfigParser,
     mlflow_tags: dict,
 ) -> None:
     """
     Trains a number of classifiers on the data that is found in the directory specified as dir_processed in config.
 
     Arguments:
-        mlflow {Union[ModuleType, MagicMock]} --  MLflow module or its mock replacement
+        mlflow {MLFlowManager} --  MLflow module or its mock replacement
         config {Union[ConfigParser, dict]} -- configuration for the training, with the required sections:
             - "training": containing "random_seed";
             - "paths": containing "artifacts_temp" and "dir_processed";
@@ -65,7 +64,7 @@ def train_classifiers(
     random_seed = int(config["training"]["random_seed"])
     # workspace_dir = Path(config["paths"]["workspace_dir"])
     dir_processed = config["paths"]["dir_processed"]
-    dir_artifacts = Path(config["paths"]["artifacts_temp"])
+    dir_artifacts = Path(config["paths"]["artifact_temp"])
     #full_dir_artifacts = workspace_dir / dir_artifacts
     full_dir_artifacts = dir_artifacts # NOTE: Modified for local testing
     filepath_conf_matrix = full_dir_artifacts / "confusion_matrix.png"
@@ -74,10 +73,8 @@ def train_classifiers(
     # Prepare before run
     np.random.seed(random_seed)
     full_dir_artifacts.mkdir(exist_ok=True)
-    mlflow.set_tracking_uri(mlflow_url)
-    mlflow.set_experiment(mlflow_experiment)
 
-    with mlflow.start_run(run_name="sklearn_example_train", tags=mlflow_tags):
+    with manager.start_run(run_name="sklearn_example_train", tags=mlflow_tags):
 
         # Load training and validation data
         X_train, X_val, _, y_train, y_val, _ = load_data_splits(
@@ -90,7 +87,7 @@ def train_classifiers(
         # Iterate fitting and validation through all model types, logging results to MLflow:
         for model_name, model in models.items():
 
-            with mlflow.start_run(run_name=model_name, nested=True, tags=mlflow_tags):
+            with manager.start_run(run_name=model_name, nested=True, tags=mlflow_tags):
 
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_val)
@@ -103,6 +100,17 @@ def train_classifiers(
                     savepath=filepath_conf_matrix,
                 )
 
-                mlflow.log_artifacts(full_dir_artifacts)
-                mlflow.log_params({"classifier": model_name})
-                mlflow.log_metrics({"val_acc": val_accuracy})
+                # Save MLFLow model
+                manager.log_sklearn_model(model, "model")
+
+                # Register Azure ML Studio model
+                description = f"Model {model_name} trained on cancer data"
+                manager.register_model(
+                    model_name=model_name,
+                    description=description,
+                    tags=mlflow_tags
+                )
+
+                manager.log_artifacts(str(full_dir_artifacts)) # NOTE: Update the artifcat every iterate, so we can see the last run
+                manager.log_params({"classifier": model_name})
+                manager.log_metrics({"val_acc": val_accuracy})

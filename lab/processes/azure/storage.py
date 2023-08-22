@@ -1,12 +1,14 @@
-import mlflow
+import numpy as np
+import io
 import os
 
 from azureml.core import Workspace, Datastore
+from azure.storage.blob.aio import BlobClient
 from dotenv import load_dotenv
 
 class AzureDatastoreManager:
     
-    def __init__(self, config_path='../azure.json'):
+    def __init__(self, config_path='../azure.json'): # NOTE: Hardcoded config_path
         load_dotenv() 
         self.ws = Workspace.from_config(config_path)
         self.account_name = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
@@ -47,41 +49,24 @@ class AzureDatastoreManager:
         except Exception as e:
             print("Error creating container ", e)
             raise
-
-
-class MLFlowManager:
-    def __init__(self, experiment_name: str, config_file = '../azure.json'):
-        self.workspace = Workspace.from_config(config_file)
-        mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri()) #NOTE: Added trackir uri to config
-        mlflow.set_experiment(experiment_name)
-
-    def start_run(self, *args, **kwargs):
-        return mlflow.start_run(*args, **kwargs)
-
-    def log_sklearn_model(self, model, name):
-        return mlflow.sklearn.log_model(model, name)
-
-    def register_model(self, model_name: str, description: str, tags: dict):
-        model_name = model_name.replace(" ", "_")
-        tags["description"] = description
-        model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
-        
-
     
-        print(f"Registering model '{model_name}' with tags: {tags} and uri: {model_uri}")
+    async def _get_blob_as_bytes(self, blob_name):
+        """Obtiene el blob como objeto BytesIO."""
+        connection_string = f"DefaultEndpointsProtocol=https;AccountName={self.account_name};AccountKey={self.account_key};EndpointSuffix=core.windows.net"
+        blob = BlobClient.from_connection_string(conn_str=connection_string, container_name=self.container_name, blob_name=blob_name)
+        try:
+            blob_data_obj = await blob.download_blob()
+            blob_data = await blob_data_obj.readall()
+            return blob_data
+        finally:
+            # Cerrar el cliente
+            await blob.close()
+
+    async def load_data_from_blob(self, blob_name):
+        """Carga los datos desde Azure Blob."""
+        blob_data = await self._get_blob_as_bytes(blob_name)
+        return np.load(io.BytesIO(blob_data))
 
 
-        mlflow.register_model(
-            f"runs:/{mlflow.active_run().info.run_id}/model", 
-            name=model_name)
 
-    def log_artifacts(self, *args, **kwargs):
-        print("Logging artifacts", args, kwargs)
-        return mlflow.log_artifacts(*args, **kwargs)
-    
-    def log_params(self, *args, **kwargs):
-        return mlflow.log_params(*args, **kwargs)
-
-    def log_metrics(self, *args, **kwargs):
-        return mlflow.log_metrics(*args, **kwargs)
     

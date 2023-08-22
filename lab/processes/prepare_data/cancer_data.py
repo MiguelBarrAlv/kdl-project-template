@@ -10,7 +10,7 @@ from azureml.core import Workspace, Datastore
 from dotenv import load_dotenv
 from pandas import DataFrame, Series
 from pathlib import Path
-from ..azure.services import AzureDatastoreManager
+from ..azure.storage import AzureDatastoreManager
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -25,7 +25,7 @@ def load_cancer_data() -> Tuple[DataFrame, Series]:
     """
     Loads breast cancer data as pandas DataFrame (features) and Series (target)
     """
-    X, y = load_breast_cancer(return_X_y=True, as_frame=True)
+    X, y = load_breast_cancer(return_X_y=True, as_frame=True) 
     return X, y
 
 
@@ -47,6 +47,7 @@ def split_data(X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray]:
 
 
 def prepare_cancer_data(dir_output: str) -> None:
+    # NOTE: Refactor function for Azure naming conventions
     """
     Conducts a series of steps necessary to prepare the digit data for training and validation:
     - Loads digit image data from sklearn
@@ -74,7 +75,8 @@ def prepare_cancer_data(dir_output: str) -> None:
     X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
     X_val = pd.DataFrame(scaler.transform(X_val), columns=X_val.columns)
     X_test = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
-
+    # print("X_train shape: ", X_train.shape, "y_train shape: ", y_train.shape, "X_val shape: ", X_val.shape, "y_val shape: ",y_val.shape)
+    # print(f"X_train, {X_train[:5]}, {y_train[:5]}", "X_val shape: ", X_val.shape, "y_val shape: ",y_val[:5])
     # Save processed data
     np.save(str(Path(dir_output) / "X_train.npy"), X_train.to_numpy())
     np.save(str(Path(dir_output) / "y_train.npy"), y_train.to_numpy())
@@ -88,47 +90,47 @@ def prepare_cancer_data(dir_output: str) -> None:
     azure_data_connection.upload_data(dir_output)
 
 
-def load_data_splits(
-    dir_processed: Union[str, Path], as_type: str
-) -> Tuple[Union[np.ndarray, torch.Tensor]]:
-    """
-    Loads train/val/test files for X and y (named 'X_train.npy', 'y_train.npy', etc.)
-    from the location specified and returns as numpy arrays.
+# def load_data_splits(
+#     dir_processed: Union[str, Path], as_type: str
+# ) -> Tuple[Union[np.ndarray, torch.Tensor]]:
+#     """
+#     Loads train/val/test files for X and y (named 'X_train.npy', 'y_train.npy', etc.)
+#     from the location specified and returns as numpy arrays.
 
-    Args:
-        dir_processed: (str or Path) directory containing processed data files
-        as_type: (str) type of outputs; one of 'array' (returns as numpy ndarray)
-            or 'tensor' (returns as pytorch tensor)
+#     Args:
+#         dir_processed: (str or Path) directory containing processed data files
+#         as_type: (str) type of outputs; one of 'array' (returns as numpy ndarray)
+#             or 'tensor' (returns as pytorch tensor)
 
-    Returns:
-        (tuple) of numpy arrays or torch tensors for
-            X_train, X_val, X_test, y_train, y_val, y_test
-    """
-    X_train = np.load(str(Path(dir_processed) / "X_train.npy"))
-    y_train = np.load(str(Path(dir_processed) / "y_train.npy"))
-    X_val = np.load(str(Path(dir_processed) / "X_val.npy"))
-    y_val = np.load(str(Path(dir_processed) / "y_val.npy"))
-    X_test = np.load(str(Path(dir_processed) / "X_test.npy"))
-    y_test = np.load(str(Path(dir_processed) / "y_test.npy"))
+#     Returns:
+#         (tuple) of numpy arrays or torch tensors for
+#             X_train, X_val, X_test, y_train, y_val, y_test
+#     """
+#     X_train = np.load(str(Path(dir_processed) / "X_train.npy"))
+#     y_train = np.load(str(Path(dir_processed) / "y_train.npy"))
+#     X_val = np.load(str(Path(dir_processed) / "X_val.npy"))
+#     y_val = np.load(str(Path(dir_processed) / "y_val.npy"))
+#     X_test = np.load(str(Path(dir_processed) / "X_test.npy"))
+#     y_test = np.load(str(Path(dir_processed) / "y_test.npy"))
 
-    if as_type == "array":
-        return X_train, X_val, X_test, y_train, y_val, y_test
+#     if as_type == "array":
+#         return X_train, X_val, X_test, y_train, y_val, y_test
 
-    elif as_type == "tensor":
-        # pylint: disable=not-callable
-        X_train = torch.Tensor(X_train).float()
-        y_train = torch.Tensor(y_train).float()
-        X_val = torch.Tensor(X_val).float()
-        y_val = torch.Tensor(y_val).float()
-        X_test = torch.Tensor(X_test).float()
-        y_test = torch.Tensor(y_test).float()
+#     elif as_type == "tensor":
+#         # pylint: disable=not-callable
+#         X_train = torch.Tensor(X_train).float()
+#         y_train = torch.Tensor(y_train).float()
+#         X_val = torch.Tensor(X_val).float()
+#         y_val = torch.Tensor(y_val).float()
+#         X_test = torch.Tensor(X_test).float()
+#         y_test = torch.Tensor(y_test).float()
 
-        return X_train, X_val, X_test, y_train, y_val, y_test
+#         return X_train, X_val, X_test, y_train, y_val, y_test
 
-    else:
-        raise ValueError(
-            "Please specify as_type argument as one of 'array' or 'tensor'"
-        )
+#     else:
+#         raise ValueError(
+#             "Please specify as_type argument as one of 'array' or 'tensor'"
+#         )
 
 
 def load_data_splits_as_dataloader(
@@ -149,3 +151,44 @@ def load_data_splits_as_dataloader(
     test_loader = create_dataloader(X_test, y_test, dataloader_args)
 
     return train_loader, val_loader, test_loader
+
+
+async def load_data_splits(datastore_manager: AzureDatastoreManager, as_type: str) -> Tuple[Union[np.ndarray, torch.Tensor]]:
+    """
+    Load train/val/test files para X y y from Azure Blob Storage.
+
+    Args:
+        datastore_manager: La instancia de AzureDatastoreManager que tiene los detalles de Azure Blob Storage.
+        as_type: (str) tipo de outputs; uno de 'array' (devuelve como numpy ndarray)
+            o 'tensor' (devuelve como pytorch tensor)
+
+    Returns:
+        (tuple) de numpy arrays o torch tensors para
+            X_train, X_val, X_test, y_train, y_val, y_test
+    """
+    # NOTE: Refactor function for Azure naming conventions
+    X_train = await datastore_manager.load_data_from_blob("split-data/X_train.npy")
+    y_train = await datastore_manager.load_data_from_blob("split-data/y_train.npy")
+    X_val = await datastore_manager.load_data_from_blob("split-data/X_val.npy")
+    y_val = await datastore_manager.load_data_from_blob("split-data/y_val.npy")
+    X_test = await datastore_manager.load_data_from_blob("split-data/X_test.npy")
+    y_test = await datastore_manager.load_data_from_blob("split-data/y_test.npy")
+
+    if as_type == "array":
+        return X_train, X_val, X_test, y_train, y_val, y_test
+
+    elif as_type == "tensor":
+        # pylint: disable=not-callable
+        X_train = torch.Tensor(X_train).float()
+        y_train = torch.Tensor(y_train).float()
+        X_val = torch.Tensor(X_val).float()
+        y_val = torch.Tensor(y_val).float()
+        X_test = torch.Tensor(X_test).float()
+        y_test = torch.Tensor(y_test).float()
+
+        return X_train, X_val, X_test, y_train, y_val, y_test
+
+    else:
+        raise ValueError(
+            "Please specify as_type argument as one of 'array' or 'tensor'"
+        )

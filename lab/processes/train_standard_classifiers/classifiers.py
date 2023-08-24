@@ -110,8 +110,6 @@ async def train_classifiers(
                 )
 
                 manager_mlflow.log_artifacts(str(full_dir_artifacts)) # NOTE: Overwrite the artifact every iterate, so we can see the last run
-                manager_mlflow.log_params({"classifier": model_name})
+                manager_mlflow.log_params({"classifier": random_seed})
                 manager_mlflow.log_metrics({"val_acc": val_accuracy})
-                print(f"Validation accuracy: {val_accuracy}")
-                print("classifier: ", model_name)
                 

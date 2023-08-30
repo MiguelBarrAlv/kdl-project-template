@@ -6,7 +6,6 @@ Part 2: Training traditional ML models
 
 import configparser
 import os
-
 import mlflow
 
 from lab.processes.train_standard_classifiers.classifiers import train_classifiers

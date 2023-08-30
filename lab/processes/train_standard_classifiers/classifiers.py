@@ -1,13 +1,14 @@
 """
 Functions for instantiating and training traditional ML classifiers
 """
-from configparser import ConfigParser
-from pathlib import Path
-from types import ModuleType
-from typing import Union
-
 import numpy as np
+
+from configparser import ConfigParser
+from lab.processes.prepare_data.cancer_data import load_data_splits
+from lab.processes.aws.sagemaker import deploy_model_to_sagemaker
+from lib.viz import plot_confusion_matrix
 from mock import MagicMock
+from pathlib import Path
 from sklearn.ensemble import (
     AdaBoostClassifier,
     GradientBoostingClassifier,
@@ -18,9 +19,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from types import ModuleType
+from typing import Union
 
-from lab.processes.prepare_data.cancer_data import load_data_splits
-from lib.viz import plot_confusion_matrix
 
 
 def create_classifiers() -> dict:
@@ -88,21 +89,34 @@ def train_classifiers(
         models = create_classifiers()
 
         # Iterate fitting and validation through all model types, logging results to MLflow:
-        for model_name, model in models.items():
+    for model_name, model in models.items():
 
-            with mlflow.start_run(run_name=model_name, nested=True, tags=mlflow_tags):
+        with mlflow.start_run(run_name=model_name, nested=True, tags=mlflow_tags) as run:
 
-                model.fit(X_train, y_train)
-                y_pred = model.predict(X_val)
-                val_accuracy = accuracy_score(y_pred, y_val)
-                cm = confusion_matrix(y_val, y_pred)
-                plot_confusion_matrix(
-                    cm,
-                    normalize=False,
-                    title="Confusion matrix (validation set)",
-                    savepath=filepath_conf_matrix,
-                )
+            model.fit(X_train, y_train)
+            print(f"Model {model_name} trained successfully.")
+            y_pred = model.predict(X_val)
+            val_accuracy = accuracy_score(y_pred, y_val)
+            cm = confusion_matrix(y_val, y_pred)
+            plot_confusion_matrix(
+                cm,
+                normalize=False,
+                title="Confusion matrix (validation set)",
+                savepath=filepath_conf_matrix,
+            )
+            try:
+                mlflow.sklearn.log_model(model, "model")
+                print(f"Model {model_name} saved successfully.")
+            except Exception as e:
+                print(f"Error saving model {model_name}: {e}")
 
-                mlflow.log_artifacts(full_dir_artifacts)
-                mlflow.log_params({"classifier": model_name})
-                mlflow.log_metrics({"val_acc": val_accuracy})
+            mlflow.log_artifacts(full_dir_artifacts)
+            mlflow.log_params({"classifier": model_name})
+            mlflow.log_metrics({"val_acc": val_accuracy})
+            
+            # Captura el run_id de la subejecución actual
+            current_run_id = run.info.run_id
+
+            # Construye la URI del modelo usando el run_id de la subejecución correcta
+            model_uri = f"runs:/{current_run_id}/model"
+            deploy_model_to_sagemaker(model_uri, "kdl-template", "688013747199.dkr.ecr.eu-north-1.amazonaws.com/kdl-template-mlflow:latest")

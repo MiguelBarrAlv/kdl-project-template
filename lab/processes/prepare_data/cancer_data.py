@@ -1,20 +1,22 @@
 """
 Functions for preparing the breast cancer dataset for training and validating ML algorithms
 """
+import numpy as np
+import os
+import pandas as pd
+import torch
 
+from dotenv import load_dotenv
+from lab.processes.aws.s3 import S3DatastoreManager
+from lib.pytorch import create_dataloader
+from pandas import DataFrame, Series
+from sklearn.datasets import load_breast_cancer
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
 from pathlib import Path
 from typing import Tuple, Union
 
-import numpy as np
-import pandas as pd
-import torch
-from pandas import DataFrame, Series
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from torch.utils.data import DataLoader
-
-from lib.pytorch import create_dataloader
 
 RANDOM_STATE = 42
 
@@ -46,8 +48,8 @@ def split_data(X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray]:
 
 def prepare_cancer_data(dir_output: str) -> None:
     """
-    Conducts a series of steps necessary to prepare the digit data for training and validation:
-    - Loads digit image data from sklearn
+    Conducts a series of steps necessary to prepare the cancer data for training and validation:
+    - Loads cancer data
     - Splits the data into train, val, and test sets
     - Applies transformations as defined in transform_data
     - Saves output tensors to the destination path provided
@@ -58,6 +60,7 @@ def prepare_cancer_data(dir_output: str) -> None:
     Returns:
         (None)
     """
+    load_dotenv() 
     Path(dir_output).mkdir(exist_ok=True)
 
     # Load digit data
@@ -66,7 +69,6 @@ def prepare_cancer_data(dir_output: str) -> None:
     # Split into train/test/val
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X=imgs, y=y)
 
-    # Normalize input features:
     scaler = StandardScaler()
     X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
     X_val = pd.DataFrame(scaler.transform(X_val), columns=X_val.columns)
@@ -79,6 +81,11 @@ def prepare_cancer_data(dir_output: str) -> None:
     np.save(str(Path(dir_output) / "y_val.npy"), y_val.to_numpy())
     np.save(str(Path(dir_output) / "X_test.npy"), X_test.to_numpy())
     np.save(str(Path(dir_output) / "y_test.npy"), y_test.to_numpy())
+
+    # AWS S3
+    bucket_name = os.getenv("AWS_S3_BUCKET_NAME")
+    s3_data_connection = S3DatastoreManager(bucket_name=bucket_name)
+    s3_data_connection.upload_data(dir_output)
 
 
 def load_data_splits(

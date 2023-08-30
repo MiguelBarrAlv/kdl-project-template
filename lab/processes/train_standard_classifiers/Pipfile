@@ -5,12 +5,14 @@ name = "pypi"
 
 [packages]
 sklearn = "==0.0"
-mlflow = "==2.2.1"
 mock = "==5.0.1"
 torch = "==1.12.1"
 pynvml = "==11.5.0"
 matplotlib = "==3.6.2"
-boto3 = "1.24.59"
+boto3 = "*"
+sagemaker = "==2.180.0"
+python-dotenv = "*"
+mlflow = {version = "*", extras = ["sagemaker"]}
 
 [dev-packages]
 pylint = "==2.15.0"

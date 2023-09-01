@@ -114,9 +114,11 @@ def train_classifiers(
             mlflow.log_params({"classifier": model_name})
             mlflow.log_metrics({"val_acc": val_accuracy})
             
-            # Captura el run_id de la subejecución actual
+            # Get the run_id of the subrun
             current_run_id = run.info.run_id
+            current_experiment_id = run.info.experiment_id
+            current_run_name = run.info.run_name
 
-            # Construye la URI del modelo usando el run_id de la subejecución correcta
-            model_uri = f"runs:/{current_run_id}/model"
-            deploy_model_to_sagemaker(model_uri, "kdl-template", "688013747199.dkr.ecr.eu-north-1.amazonaws.com/kdl-template-mlflow:latest")
+            # Build the model uri for SageMaker
+            model_uri = f'runs:/{current_run_id}/model'
+            deploy_model_to_sagemaker(model_uri, "mlflow-pyfunc", "688013747199.dkr.ecr.eu-north-1.amazonaws.com/mlflow-pyfunc:2.6.0")

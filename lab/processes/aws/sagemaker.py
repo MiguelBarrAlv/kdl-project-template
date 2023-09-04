@@ -1,7 +1,15 @@
 import mlflow.sagemaker
+import os
+
+from dotenv import load_dotenv
 
 
-def deploy_model_to_sagemaker(model_uri, app_name, image_uri, region_name='eu-north-1'):
+def deploy_model_to_sagemaker(
+    model_uri, 
+    app_name, 
+    image_uri, 
+    region_name, 
+    aws_sagemaker_role_arn) -> None:
     """
     Deployment model using MLFlow interface.
         :param model_uri: Model uri in MLflow to deploy.
@@ -9,13 +17,13 @@ def deploy_model_to_sagemaker(model_uri, app_name, image_uri, region_name='eu-no
         :param image_uri: Docker image URI in ECR.
         :param region_name: AWS region to deploy. By default, 'eu-north-1'.
     """
+    print("imagw_uri: ", image_uri)
     # Get the deployment client
     target_uri = f"sagemaker:/{region_name}"
     client = mlflow.deployments.get_deploy_client(target_uri)
-    
     # Define the deployment configuration
     config = {
-        "execution_role_arn": "arn:aws:iam::688013747199:role/kdl-sagemaker-rol", 
+        "execution_role_arn": aws_sagemaker_role_arn, 
         "bucket_name": "igz-aws-kdl-training",
         "image_url": image_uri,
         "region_name": region_name,

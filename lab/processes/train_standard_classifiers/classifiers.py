@@ -2,8 +2,10 @@
 Functions for instantiating and training traditional ML classifiers
 """
 import numpy as np
+import os
 
 from configparser import ConfigParser
+from dotenv import load_dotenv
 from lab.processes.prepare_data.cancer_data import load_data_splits
 from lab.processes.aws.sagemaker import deploy_model_to_sagemaker
 from lib.viz import plot_confusion_matrix
@@ -21,7 +23,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from types import ModuleType
 from typing import Union
-
 
 
 def create_classifiers() -> dict:
@@ -62,6 +63,8 @@ def train_classifiers(
         mlflow_url {str} -- MLflow URL (empty if replacing mlflow with a mock)
         mlflow_tags {dict} -- MLflow tags (empty if replacing mlflow with a mock)
     """
+    load_dotenv()
+
     # Unpack config:
     random_seed = int(config["training"]["random_seed"])
     # workspace_dir = Path(config["paths"]["workspace_dir"])
@@ -71,6 +74,9 @@ def train_classifiers(
     full_dir_artifacts = dir_artifacts # NOTE: Modified for local testing
     filepath_conf_matrix = full_dir_artifacts / "confusion_matrix.png"
     mlflow_experiment = config["mlflow"]["mlflow_experiment"]
+    sagemaker_image_uri = os.getenv("AWS_SAGEMAKER_IMAGE_URI")
+    aws_sagemaker_role_arn = os.getenv("AWS_SAGEMAKER_ROLE_ARN")
+    aws_region_name = os.getenv("AWS_REGION_NAME")
 
     # Prepare before run
     np.random.seed(random_seed)
@@ -94,7 +100,6 @@ def train_classifiers(
         with mlflow.start_run(run_name=model_name, nested=True, tags=mlflow_tags) as run:
 
             model.fit(X_train, y_train)
-            print(f"Model {model_name} trained successfully.")
             y_pred = model.predict(X_val)
             val_accuracy = accuracy_score(y_pred, y_val)
             cm = confusion_matrix(y_val, y_pred)
@@ -104,9 +109,11 @@ def train_classifiers(
                 title="Confusion matrix (validation set)",
                 savepath=filepath_conf_matrix,
             )
+
             try:
                 mlflow.sklearn.log_model(model, "model")
                 print(f"Model {model_name} saved successfully.")
+
             except Exception as e:
                 print(f"Error saving model {model_name}: {e}")
 
@@ -121,4 +128,9 @@ def train_classifiers(
 
             # Build the model uri for SageMaker
             model_uri = f'runs:/{current_run_id}/model'
-            deploy_model_to_sagemaker(model_uri, "mlflow-pyfunc", "688013747199.dkr.ecr.eu-north-1.amazonaws.com/mlflow-pyfunc:2.6.0")
+            print("sagemaker_arn_model: ", aws_sagemaker_role_arn)
+            deploy_model_to_sagemaker(
+                model_uri, "mlflow-pyfunc", 
+                sagemaker_image_uri, 
+                aws_region_name, 
+                aws_sagemaker_role_arn)

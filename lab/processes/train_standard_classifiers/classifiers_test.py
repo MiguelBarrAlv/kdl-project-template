@@ -12,7 +12,7 @@ from lib.testing import get_mlflow_stub
 
 vscode_config = configparser.ConfigParser()
 # vscode_config.read("lab/processes/config_test.ini") NOTE: Commented for local testing
-vscode_config.read("lab/processes/config_azure_test.ini")
+vscode_config.read("lab/processes/configs/config_azure_test.ini")
 
 
 @pytest.mark.integration

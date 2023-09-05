@@ -41,7 +41,10 @@ class S3DatastoreManager:
 
     def _create_bucket(self):
         try:
-            self.s3_client.create_bucket(Bucket=self.bucket_name)
+            self.s3_client.create_bucket(Bucket=self.bucket_name, 
+                                        CreateBucketConfiguration={
+                                            'LocationConstraint': self.region_name
+                                        })
             print(f"Bucket '{self.bucket_name}' created successfully.")
         except Exception as e:
             print("Error creating bucket ", e)

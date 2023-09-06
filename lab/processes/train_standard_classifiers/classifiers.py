@@ -35,12 +35,12 @@ def create_classifiers() -> dict:
 
     models = {
         "Logistic regression": LogisticRegression(),
-        "Naive Bayes": GaussianNB(),
-        "K-nearest neighbour": KNeighborsClassifier(),
-        "Random forest": RandomForestClassifier(),
-        "Linear SVM": SVC(kernel="linear"),
-        "GradientBoost": GradientBoostingClassifier(),
-        "AdaBoost": AdaBoostClassifier(),
+        # "Naive Bayes": GaussianNB(),
+        # "K-nearest neighbour": KNeighborsClassifier(),
+        # "Random forest": RandomForestClassifier(),
+        # "Linear SVM": SVC(kernel="linear"),
+        # "GradientBoost": GradientBoostingClassifier(),
+        # "AdaBoost": AdaBoostClassifier(),
     }
     return models
 
@@ -86,7 +86,7 @@ def train_classifiers(
 
     with mlflow.start_run(run_name="sklearn_example_train", tags=mlflow_tags):
 
-        # Load training and validation data
+        # Load training and validation data # NOTE: Read from S3
         X_train, X_val, _, y_train, y_val, _ = load_data_splits(
             dir_processed=dir_processed, as_type="array"
         )
@@ -128,9 +128,8 @@ def train_classifiers(
 
             # Build the model uri for SageMaker
             model_uri = f'runs:/{current_run_id}/model'
-            print("sagemaker_arn_model: ", aws_sagemaker_role_arn)
             deploy_model_to_sagemaker(
-                model_uri, "mlflow-pyfunc", 
+                model_uri, "mlflow-pyfunc",
                 sagemaker_image_uri, 
                 aws_region_name, 
                 aws_sagemaker_role_arn)

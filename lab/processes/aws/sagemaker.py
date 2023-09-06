@@ -17,7 +17,6 @@ def deploy_model_to_sagemaker(
         :param image_uri: Docker image URI in ECR.
         :param region_name: AWS region to deploy. By default, 'eu-north-1'.
     """
-    print("imagw_uri: ", image_uri)
     # Get the deployment client
     target_uri = f"sagemaker:/{region_name}"
     client = mlflow.deployments.get_deploy_client(target_uri)

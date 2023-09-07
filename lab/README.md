@@ -1,32 +1,31 @@
-# AWS KDL Project Template - Prepare Data 
+# AWS KDL Project Template
 
 ## Table of contents
-- About prepare_data
+- [About](#about)
 - Environment Setup
 - Configuration
 - Execution
 - Testing
 
 ## About 
-The prepare_data component is responsible for preparing and processing data for further analysis and machine learning tasks. This includes tasks like cleaning data, transforming data formats, and uploading processed data to AWS S3.
+About
+The project serves as an integration between the **kdl-template** and **AWS services**, offering a streamlined process to manage machine learning workflows.
 
-## Local Environment Setup
-Before running any script inside prepare_data, make sure to set up the environment:
+1. **Data Preparation**:
+ Raw data undergoes processing to be transformed into a format suitable for modeling. Once processed, the data is securely stored in AWS S3, ensuring optimal availability and scalability.
 
-1. Navigate to the prepare_data directory.
-2. Run pipenv sync to ensure all dependencies are installed.
-3. Activate the virtual environment with pipenv shell.
-## Configuration
-Before executing scripts locally, ensure that all necessary configurations are defined. This includes specifying settings in config_aws.ini and setting environment variables.
+2. **Model Training**:
+ Once the data is ready, it serves as the foundation for training machine learning models. Utilizing AWS SageMaker, models are not only trained but also fine-tuned for peak performance in real-world scenarios.
 
-**Config_aws.ini**
+3. **Prediction Retrieval**:
+The culmination of the pipeline is in the retrieval of predictions. The trained models, residing in AWS SageMaker, facilitate swift and accurate predictions.
 
-    - [paths]: Defines paths like the processed data directory.
-    - [mlflow]: Contains settings related to MLflow.
-    - [filenames]: Defines filenames for specific artifacts like models or plots.
-    - [training]: Contains settings for training processes, like batch size and learning rate.
+This project's primary objective is to simplify the machine learning lifecycle by harnessing the power and flexibility of AWS services, ensuring a smooth transition from data processing to model deployment and inference.
 
-**Initial AWS Configuration**
+## Environment Setup
+
+### Initial AWS Configuration
+
 To set up and use the project correctly, specific values from AWS need to be obtained. Below is a guide on how to fetch them:
 1. **AWS SageMaker Image URI**
 
@@ -41,10 +40,17 @@ To set up and use the project correctly, specific values from AWS need to be obt
 
     - **Building and Pushing the Docker Image**
 
-        1. Run the command mlflow sagemaker build-and-push-container. This command will build the Docker image for you and push it to ECR.
+        1. Run the command:
+
+            ```
+            mlflow sagemaker build-and-push-container
+            ``` 
+        
+            This command will build the Docker image for you and push it to ECR.
+        
         2. Upon successful completion, the command will provide a URI for the newly pushed Docker image.
 
-        Set this URI as your `AWS_SAGEMAKER_IMAGE_URI`.
+            Set this URI as your `AWS_SAGEMAKER_IMAGE_URI`.
 
 2. **AWS SageMaker Role ARN**
 
@@ -56,8 +62,32 @@ To set up and use the project correctly, specific values from AWS need to be obt
     4. In the role summary page, copy the Role ARN.
     Set this ARN as your `AWS_SAGEMAKER_ROLE_ARN`.
 
+3. **IAM User**
 
-**Local Configuration**
+    For the successful execution of the project, specific AWS services are leveraged. To ensure seamless integration and operation, it's crucial to set up the necessary permissions for the AWS user. Here's a step-by-step guide to achieving this:
+
+    - **Amazon S3 Permissions**:
+        Navigate to the AWS Management Console.
+        Open the IAM dashboard and select "Users".
+        Choose the desired user and navigate to the "Permissions" tab.
+        Attach a custom policy that allows:
+        - To upload files to a bucket.
+        - To read files from a bucket
+
+    - **Amazon ECR Permissions**:
+        In the user's "Permissions" tab, attach a custom policy that allows:
+        - To upload Docker images.
+        - To retrieve Docker images for deployment.
+
+    - **Amazon SageMaker Permissions**:
+        Still in the "Permissions" tab, attach a custom policy that includes permissions for:
+        - To upload trained models.
+        - To set up an inference endpoint.
+        - To get predictions from the model..
+
+
+
+### Local Configuration
 
 For local execution, environment variables should be defined in a **.env** file located inside the **lab/processes/** directory. This file should contain the following variables:
 
@@ -74,6 +104,15 @@ AWS_SAGEMAKER_IMAGE_URI=<your_image_uri>
 AWS_SAGEMAKER_ROLE_ARN=<your_role_arn>
 AWS_REGION_NAME=<your_region_name> 
 ```
+
+Before executing scripts locally, ensure that all necessary configurations are defined. This includes specifying settings in `lab/processes/configs/config_aws.ini` and setting environment variables:
+
+
+
+    - [paths]: Defines paths like the processed data directory.
+    - [mlflow]: Contains settings related to MLflow.
+    - [filenames]: Defines filenames for specific artifacts like models or plots.
+    - [training]: Contains settings for training processes, like batch size and learning rate.
 
 ## Execution
 To execute the data preparation process:

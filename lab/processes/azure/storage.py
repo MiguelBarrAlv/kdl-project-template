@@ -27,7 +27,6 @@ class AzureDatastoreManager:
     def upload_data(self, src_dir):
         if not self._container_exists():
             self._create_container()
-
         try:
             datastore = Datastore.get(self.ws, self.blob_datastore_name)
             datastore.upload(src_dir=src_dir, target_path=self.target_path)

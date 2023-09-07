@@ -21,5 +21,4 @@ DIR_DATA_PROCESSED = config["paths"]["dir_processed"]
 # blob_helper.ensure_container_exists(CONTAINER_NAME)
 
 if __name__ == "__main__":
-
     prepare_cancer_data(dir_output=DIR_DATA_PROCESSED)

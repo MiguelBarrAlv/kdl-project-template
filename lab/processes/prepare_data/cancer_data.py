@@ -10,7 +10,7 @@ from azureml.core import Workspace, Datastore
 from dotenv import load_dotenv
 from pandas import DataFrame, Series
 from pathlib import Path
-from ..azure.storage import AzureDatastoreManager
+from lab.processes.azure.storage import AzureDatastoreManager
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -87,6 +87,7 @@ def prepare_cancer_data(dir_output: str) -> None:
 
     # Azure ML
     azure_data_connection = AzureDatastoreManager()
+    print(azure_data_connection)
     azure_data_connection.upload_data(dir_output)
 
 

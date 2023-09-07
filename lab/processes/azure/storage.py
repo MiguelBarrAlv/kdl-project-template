@@ -50,13 +50,15 @@ class AzureDatastoreManager:
             raise
     
     async def _get_blob_as_bytes(self, blob_name):
-        """Obtiene el blob como objeto BytesIO."""
+        """Get blob as BytesIO Object."""
         connection_string = f"DefaultEndpointsProtocol=https;AccountName={self.account_name};AccountKey={self.account_key};EndpointSuffix=core.windows.net"
         blob = BlobClient.from_connection_string(conn_str=connection_string, container_name=self.container_name, blob_name=blob_name)
         try:
             blob_data_obj = await blob.download_blob()
             blob_data = await blob_data_obj.readall()
             return blob_data
+        except Exception as e:
+            print("Error downloading blob: ", e)
         finally:
             # Cerrar el cliente
             await blob.close()

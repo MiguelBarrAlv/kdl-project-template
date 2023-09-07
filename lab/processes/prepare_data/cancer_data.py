@@ -87,7 +87,6 @@ def prepare_cancer_data(dir_output: str) -> None:
 
     # Azure ML
     azure_data_connection = AzureDatastoreManager()
-    print(azure_data_connection)
     azure_data_connection.upload_data(dir_output)
 
 
@@ -168,12 +167,12 @@ async def load_data_splits(datastore_manager: AzureDatastoreManager, as_type: st
             X_train, X_val, X_test, y_train, y_val, y_test
     """
     # NOTE: Refactor function for Azure naming conventions
-    X_train = await datastore_manager.load_data_from_blob("split-data/X_train.npy")
-    y_train = await datastore_manager.load_data_from_blob("split-data/y_train.npy")
-    X_val = await datastore_manager.load_data_from_blob("split-data/X_val.npy")
-    y_val = await datastore_manager.load_data_from_blob("split-data/y_val.npy")
-    X_test = await datastore_manager.load_data_from_blob("split-data/X_test.npy")
-    y_test = await datastore_manager.load_data_from_blob("split-data/y_test.npy")
+    X_train = await datastore_manager.load_data_from_blob("X_train.npy")
+    y_train = await datastore_manager.load_data_from_blob("y_train.npy")
+    X_val = await datastore_manager.load_data_from_blob("X_val.npy")
+    y_val = await datastore_manager.load_data_from_blob("y_val.npy")
+    X_test = await datastore_manager.load_data_from_blob("X_test.npy")
+    y_test = await datastore_manager.load_data_from_blob("y_test.npy")
 
     if as_type == "array":
         return X_train, X_val, X_test, y_train, y_val, y_test

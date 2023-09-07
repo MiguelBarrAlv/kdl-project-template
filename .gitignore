@@ -629,7 +629,7 @@ Temporary Items
 #build and release folders
 */CMakeFiles
 */CMakeCache.txt
-*/Makefile
+
 */cmake_install.cmake
 ### PyCharm+all ###
 ### PyCharm+all Patch ###
@@ -737,3 +737,6 @@ $RECYCLE.BIN/
 
 #MLrun
 *mlruns/
+*azure.json
+# Caution: This makefile is only for PoC for Local Run
+#*/Makefile

@@ -2,10 +2,9 @@
 
 ## Table of contents
 - [About](#about)
-- Environment Setup
-- Configuration
-- Execution
-- Testing
+- [Environment Setup](#environment-setup)
+- [Execution](#execution)
+
 
 ## About 
 About

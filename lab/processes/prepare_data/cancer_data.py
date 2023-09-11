@@ -87,50 +87,8 @@ def prepare_cancer_data(dir_output: str) -> None:
 
     # Azure ML
     azure_data_connection = AzureDatastoreManager()
+    
     azure_data_connection.upload_data(dir_output)
-
-
-# def load_data_splits(
-#     dir_processed: Union[str, Path], as_type: str
-# ) -> Tuple[Union[np.ndarray, torch.Tensor]]:
-#     """
-#     Loads train/val/test files for X and y (named 'X_train.npy', 'y_train.npy', etc.)
-#     from the location specified and returns as numpy arrays.
-
-#     Args:
-#         dir_processed: (str or Path) directory containing processed data files
-#         as_type: (str) type of outputs; one of 'array' (returns as numpy ndarray)
-#             or 'tensor' (returns as pytorch tensor)
-
-#     Returns:
-#         (tuple) of numpy arrays or torch tensors for
-#             X_train, X_val, X_test, y_train, y_val, y_test
-#     """
-#     X_train = np.load(str(Path(dir_processed) / "X_train.npy"))
-#     y_train = np.load(str(Path(dir_processed) / "y_train.npy"))
-#     X_val = np.load(str(Path(dir_processed) / "X_val.npy"))
-#     y_val = np.load(str(Path(dir_processed) / "y_val.npy"))
-#     X_test = np.load(str(Path(dir_processed) / "X_test.npy"))
-#     y_test = np.load(str(Path(dir_processed) / "y_test.npy"))
-
-#     if as_type == "array":
-#         return X_train, X_val, X_test, y_train, y_val, y_test
-
-#     elif as_type == "tensor":
-#         # pylint: disable=not-callable
-#         X_train = torch.Tensor(X_train).float()
-#         y_train = torch.Tensor(y_train).float()
-#         X_val = torch.Tensor(X_val).float()
-#         y_val = torch.Tensor(y_val).float()
-#         X_test = torch.Tensor(X_test).float()
-#         y_test = torch.Tensor(y_test).float()
-
-#         return X_train, X_val, X_test, y_train, y_val, y_test
-
-#     else:
-#         raise ValueError(
-#             "Please specify as_type argument as one of 'array' or 'tensor'"
-#         )
 
 
 def load_data_splits_as_dataloader(

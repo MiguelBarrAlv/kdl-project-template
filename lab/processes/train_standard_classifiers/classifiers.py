@@ -6,6 +6,8 @@ import numpy as np
 from configparser import ConfigParser
 from lab.processes.azure.train import MLFlowManager
 from lab.processes.azure.storage import AzureDatastoreManager
+from lab.processes.prepare_data.cancer_data import load_data_splits
+from lib.viz import plot_confusion_matrix
 from mock import MagicMock
 from sklearn.ensemble import (
     AdaBoostClassifier,
@@ -20,8 +22,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from lab.processes.prepare_data.cancer_data import load_data_splits
-from lib.viz import plot_confusion_matrix
 
 
 def create_classifiers() -> dict:
@@ -35,11 +35,11 @@ def create_classifiers() -> dict:
     models = {
         "Logistic regression": LogisticRegression(),
         "Naive Bayes": GaussianNB(),
-        "K-nearest neighbour": KNeighborsClassifier(),
-        "Random forest": RandomForestClassifier(),
-        "Linear SVM": SVC(kernel="linear"),
-        "GradientBoost": GradientBoostingClassifier(),
-        "AdaBoost": AdaBoostClassifier(),
+        # "K-nearest neighbour": KNeighborsClassifier(),
+        # "Random forest": RandomForestClassifier(),
+        # "Linear SVM": SVC(kernel="linear"),
+        # "GradientBoost": GradientBoostingClassifier(),
+        # "AdaBoost": AdaBoostClassifier(),
     }
     return models
 
@@ -62,7 +62,6 @@ async def train_classifiers(
         mlflow_url {str} -- MLflow URL (empty if replacing mlflow with a mock)
         mlflow_tags {dict} -- MLflow tags (empty if replacing mlflow with a mock)
     """
-    # Unpack config:
     random_seed = int(config["training"]["random_seed"])
     dir_processed = config["paths"]["dir_processed"]
     dir_artifacts = Path(config["paths"]["artifact_temp"])
@@ -70,7 +69,6 @@ async def train_classifiers(
     filepath_conf_matrix = full_dir_artifacts / "confusion_matrix.png"
     mlflow_experiment = config["mlflow"]["mlflow_experiment"]
 
-    # Prepare before run
     np.random.seed(random_seed)
     full_dir_artifacts.mkdir(exist_ok=True)
 

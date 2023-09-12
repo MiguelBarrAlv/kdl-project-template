@@ -56,9 +56,9 @@ datastore_manager = AzureDatastoreManager()
 X_train, X_val, X_test, y_train, y_val, y_test = asyncio.run(load_data_splits(datastore_manager, "array"))
 
 sample_data = [X_train[0].tolist()]
-api_key = ""
-model_name = ""
-endpoint_url = ""
+api_key = "fynSwbog8VfFQ2R7SGiRBd6iOhF4aRg4"
+model_name = "adaboost-7"
+endpoint_url = "https://poc-kld-template-fheao.northcentralus.inference.ml.azure.com/score"
 prediction = predict_with_azure(endpoint_url, api_key, model_name, sample_data)
 
 print(prediction)

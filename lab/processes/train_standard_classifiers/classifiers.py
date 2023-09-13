@@ -129,7 +129,8 @@ def train_classifiers(
             # Build the model uri for SageMaker
             model_uri = f'runs:/{current_run_id}/model'
             deploy_model_to_sagemaker(
-                model_uri, "mlflow-pyfunc",
+                model_uri, 
+                "mlflow-pyfunc",
                 sagemaker_image_uri, 
                 aws_region_name, 
                 aws_sagemaker_role_arn)

@@ -17,8 +17,6 @@ train-classifiers:
 	@cd $(TRAIN_CLASSIFIERS_PATH) && pipenv sync
 	@cd $(TRAIN_CLASSIFIERS_PATH) && PATH_CONFIG=$(PATH_CONFIG) pipenv run python3 main.py
 	@cd $(TRAIN_CLASSIFIERS_PATH) && pipenv run python3 main.py
-	# @echo "Cleaning up mlruns directory..."
-	# @rm -rf $(MLRUNS_PATH)/*
 
 get-prediction:
 	@echo "Getting predictions using standard classifiers..."

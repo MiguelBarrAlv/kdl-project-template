@@ -75,8 +75,7 @@ def prepare_cancer_data(dir_output: str) -> None:
     X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
     X_val = pd.DataFrame(scaler.transform(X_val), columns=X_val.columns)
     X_test = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
-    # print("X_train shape: ", X_train.shape, "y_train shape: ", y_train.shape, "X_val shape: ", X_val.shape, "y_val shape: ",y_val.shape)
-    # print(f"X_train, {X_train[:5]}, {y_train[:5]}", "X_val shape: ", X_val.shape, "y_val shape: ",y_val[:5])
+
     # Save processed data
     np.save(str(Path(dir_output) / "X_train.npy"), X_train.to_numpy())
     np.save(str(Path(dir_output) / "y_train.npy"), y_train.to_numpy())
@@ -87,7 +86,6 @@ def prepare_cancer_data(dir_output: str) -> None:
 
     # Azure ML
     azure_data_connection = AzureDatastoreManager()
-    
     azure_data_connection.upload_data(dir_output)
 
 
@@ -100,10 +98,9 @@ def load_data_splits_as_dataloader(
     X_train, X_val, X_test, y_train, y_val, y_test = load_data_splits(
         dir_processed, as_type="tensor"
     )
-
+    
     # Convert tensors to dataloaders
     dataloader_args = dict(batch_size=batch_size, num_workers=n_workers, shuffle=True)
-
     train_loader = create_dataloader(X_train, y_train, dataloader_args)
     val_loader = create_dataloader(X_val, y_val, dataloader_args)
     test_loader = create_dataloader(X_test, y_test, dataloader_args)

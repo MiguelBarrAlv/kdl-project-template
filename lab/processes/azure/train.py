@@ -3,26 +3,17 @@ import json
 
 from azureml.core import Workspace
 from dotenv import load_dotenv
+from lab.processes.azure.workspace import AzureWorkspaceConnector
 from pathlib import Path
 
-class MLFlowManager:
+class MLFlowManager(AzureWorkspaceConnector):
     
-    def __init__(self, experiment_name: str, config_filename='azure.json'): # NOTE: Hardcoded config_path        
-        load_dotenv()
-        
-        current_path = Path(__file__).resolve().parent
-        config_path = current_path.parent / 'configs' / config_filename
+    def __init__(self, experiment_name: str, config_filename='azure.json'):
+        super().__init__(config_filename)
 
-        if not config_path.exists():
-            raise ValueError(f"Azure config file not found: '{config_filename}'")
+        self.workspace = self.ws
 
-        with open(config_path) as config_file:
-            config = json.load(config_file)
-            print("Azure config loaded successfully.")
-
-        self.workspace = Workspace.from_config(config_path)
-
-        mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri()) # NOTE: Added tracking uri to config
+        mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri())
         mlflow.set_experiment(experiment_name)
 
     def start_run(self, *args, **kwargs):

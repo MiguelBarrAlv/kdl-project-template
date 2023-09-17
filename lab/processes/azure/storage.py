@@ -6,24 +6,14 @@ import os
 from azureml.core import Workspace, Datastore
 from azure.storage.blob.aio import BlobClient
 from dotenv import load_dotenv
+from lab.processes.azure.workspace import AzureWorkspaceConnector
 from pathlib import Path
 
-class AzureDatastoreManager:
+class AzureDatastoreManager(AzureWorkspaceConnector):
     
     def __init__(self, config_filename='azure.json'):
-        load_dotenv()
+        super().__init__(config_filename)
 
-        current_path = Path(__file__).resolve().parent
-        config_path = current_path.parent / 'configs' / config_filename
-
-        if not config_path.exists():
-            raise ValueError(f"Azure config file not found: '{config_filename}'")
-
-        with open(config_path) as config_file:
-            config = json.load(config_file)
-            print("Azure config loaded successfully.")
-        
-        self.ws = Workspace.from_config(config_path)
         self.account_name = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
         self.account_key = os.getenv("AZURE_STORAGE_ACCOUNT_KEY")
         self.blob_datastore_name = os.getenv("AZURE_STORAGE_BLOB_DATASTORE_NAME")

@@ -7,7 +7,9 @@ import pandas as pd
 import torch
 
 from azureml.core import Workspace, Datastore
+from azure.core.exceptions import ResourceExistsError
 from dotenv import load_dotenv
+from io import BytesIO
 from pandas import DataFrame, Series
 from pathlib import Path
 from lab.processes.azure.storage import AzureDatastoreManager
@@ -21,7 +23,7 @@ from lib.pytorch import create_dataloader
 RANDOM_STATE = 42
 
 
-def load_cancer_data() -> Tuple[DataFrame, Series]:
+def load_cancer_data(return_X_y: bool = True) -> Tuple[DataFrame, Series]:
     """
     Loads breast cancer data as pandas DataFrame (features) and Series (target)
     """
@@ -147,3 +149,56 @@ async def load_data_splits(datastore_manager: AzureDatastoreManager, as_type: st
         raise ValueError(
             "Please specify as_type argument as one of 'array' or 'tensor'"
         )
+
+def save_cancer_data_to_csv(output_path: str) -> None:
+    """
+    Loads the breast cancer dataset and saves it as a CSV file.
+    Args:
+        output_path (str): The path where the CSV file should be saved.
+    """
+    dataset = load_breast_cancer(return_X_y=False, as_frame=True)
+
+    # Save the dataset as a CSV file
+    dataset.to_csv(output_path, index=False)
+
+
+def upload_dataframe_to_azure_blob(blob_name: str  = 'breast_cancer_data.csv') -> None:
+    """
+    Loads the breast cancer dataset, unifies it, and uploads it directly 
+    to Azure Blob Storage without saving it locally.
+    
+    Args:
+        blob_name (str): The name of the blob (file) in Azure Blob Storage.
+    """
+    # Load the breast cancer dataset
+    data = load_breast_cancer(return_X_y=False, as_frame=True)
+    df = data['data']
+    df['target'] = data['target']
+
+    # Convert DataFrame to BytesIO
+    data_io = dataframe_to_bytesio(df)
+
+    # Upload BytesIO to Azure Blob Storage
+    azure_data_connection = AzureDatastoreManager()
+
+    try:
+        azure_data_connection.upload_data_from_stream(data_io, blob_name)
+        print(f"Data uploaded to: {azure_data_connection.blob_datastore_name}/{azure_data_connection.container_name}")
+    except ResourceExistsError:
+        print(f"Blob already exists in Azure Blob Storage withn path {azure_data_connection.blob_datastore_name}/{azure_data_connection.container_name}")
+
+
+def dataframe_to_bytesio(df: pd.DataFrame) -> BytesIO:
+    """
+    Converts a DataFrame into a BytesIO object.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame to be converted.
+        
+    Returns:
+        BytesIO object representing the DataFrame.
+    """
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    return output

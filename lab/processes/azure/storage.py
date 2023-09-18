@@ -5,7 +5,9 @@ import os
 
 from azureml.core import Workspace, Datastore
 from azure.storage.blob.aio import BlobClient
+from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+from io import BytesIO
 from lab.processes.azure.workspace import AzureWorkspaceConnector
 from pathlib import Path
 
@@ -71,6 +73,20 @@ class AzureDatastoreManager(AzureWorkspaceConnector):
         blob_data = await self._get_blob_as_bytes(blob_name)
         return np.load(io.BytesIO(blob_data))
 
+
+    def upload_data_from_stream(self, data_stream: BytesIO, blob_name: str) -> None:
+            """
+            Uploads data from a BytesIO stream to Azure Blob Storage.
+
+            Args:
+                data_stream (BytesIO): The data to be uploaded as a stream.
+                blob_name (str): The name of the blob (file) in Azure Blob Storage.
+            """
+            connection_string = f"DefaultEndpointsProtocol=https;AccountName={self.account_name};AccountKey={self.account_key};EndpointSuffix=core.windows.net"
+            blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+            blob_client = blob_service_client.get_blob_client(container=self.container_name, blob=blob_name)
+            
+            blob_client.upload_blob(data_stream)
 
 
     

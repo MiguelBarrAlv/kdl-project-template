@@ -5,7 +5,7 @@ Part 1: Data preparation
 import configparser
 import os
 
-from lab.processes.prepare_data.cancer_data import prepare_cancer_data
+from lab.processes.prepare_data.cancer_data import upload_dataframe_to_azure_blob
 
 PATH_CONFIG = os.getenv("PATH_CONFIG")
 # Azure Blob Storage
@@ -20,4 +20,5 @@ DIR_DATA_PROCESSED = config["paths"]["dir_processed"]
 # blob_helper.ensure_container_exists(CONTAINER_NAME)
 
 if __name__ == "__main__":
-    prepare_cancer_data(dir_output=DIR_DATA_PROCESSED)
+    # prepare_cancer_data(dir_output=DIR_DATA_PROCESSED)
+    upload_dataframe_to_azure_blob()

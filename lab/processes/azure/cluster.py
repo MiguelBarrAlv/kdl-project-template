@@ -7,7 +7,7 @@ from lab.processes.azure.workspace import AzureWorkspaceConnector
 from pathlib import Path
 
 class ComputeManager(AzureWorkspaceConnector):
-
+    # NOTE: Refactor class for config file with aml_compute_target
     def __init__(self, config_filename='azure.json', aml_compute_target="cpu-cluster"):
         super().__init__(config_filename)
         self.aml_compute_target = aml_compute_target

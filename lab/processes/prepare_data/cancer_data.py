@@ -110,45 +110,45 @@ def load_data_splits_as_dataloader(
     return train_loader, val_loader, test_loader
 
 
-async def load_data_splits(datastore_manager: AzureDatastoreManager, as_type: str) -> Tuple[Union[np.ndarray, torch.Tensor]]:
-    """
-    Load train/val/test files para X y y from Azure Blob Storage.
+# async def load_data_splits(datastore_manager: AzureDatastoreManager, as_type: str) -> Tuple[Union[np.ndarray, torch.Tensor]]:
+#     """
+#     Load train/val/test files para X y y from Azure Blob Storage.
 
-    Args:
-        datastore_manager: La instancia de AzureDatastoreManager que tiene los detalles de Azure Blob Storage.
-        as_type: (str) tipo de outputs; uno de 'array' (devuelve como numpy ndarray)
-            o 'tensor' (devuelve como pytorch tensor)
+#     Args:
+#         datastore_manager: La instancia de AzureDatastoreManager que tiene los detalles de Azure Blob Storage.
+#         as_type: (str) tipo de outputs; uno de 'array' (devuelve como numpy ndarray)
+#             o 'tensor' (devuelve como pytorch tensor)
 
-    Returns:
-        (tuple) de numpy arrays o torch tensors para
-            X_train, X_val, X_test, y_train, y_val, y_test
-    """
-    # NOTE: Refactor function for Azure naming conventions
-    X_train = await datastore_manager.load_data_from_blob("X_train.npy")
-    y_train = await datastore_manager.load_data_from_blob("y_train.npy")
-    X_val = await datastore_manager.load_data_from_blob("X_val.npy")
-    y_val = await datastore_manager.load_data_from_blob("y_val.npy")
-    X_test = await datastore_manager.load_data_from_blob("X_test.npy")
-    y_test = await datastore_manager.load_data_from_blob("y_test.npy")
+#     Returns:
+#         (tuple) de numpy arrays o torch tensors para
+#             X_train, X_val, X_test, y_train, y_val, y_test
+#     """
+#     # NOTE: Refactor function for Azure naming conventions
+#     X_train = await datastore_manager.load_data_from_blob("X_train.npy")
+#     y_train = await datastore_manager.load_data_from_blob("y_train.npy")
+#     X_val = await datastore_manager.load_data_from_blob("X_val.npy")
+#     y_val = await datastore_manager.load_data_from_blob("y_val.npy")
+#     X_test = await datastore_manager.load_data_from_blob("X_test.npy")
+#     y_test = await datastore_manager.load_data_from_blob("y_test.npy")
 
-    if as_type == "array":
-        return X_train, X_val, X_test, y_train, y_val, y_test
+#     if as_type == "array":
+#         return X_train, X_val, X_test, y_train, y_val, y_test
 
-    elif as_type == "tensor":
-        # pylint: disable=not-callable
-        X_train = torch.Tensor(X_train).float()
-        y_train = torch.Tensor(y_train).float()
-        X_val = torch.Tensor(X_val).float()
-        y_val = torch.Tensor(y_val).float()
-        X_test = torch.Tensor(X_test).float()
-        y_test = torch.Tensor(y_test).float()
+#     elif as_type == "tensor":
+#         # pylint: disable=not-callable
+#         X_train = torch.Tensor(X_train).float()
+#         y_train = torch.Tensor(y_train).float()
+#         X_val = torch.Tensor(X_val).float()
+#         y_val = torch.Tensor(y_val).float()
+#         X_test = torch.Tensor(X_test).float()
+#         y_test = torch.Tensor(y_test).float()
 
-        return X_train, X_val, X_test, y_train, y_val, y_test
+#         return X_train, X_val, X_test, y_train, y_val, y_test
 
-    else:
-        raise ValueError(
-            "Please specify as_type argument as one of 'array' or 'tensor'"
-        )
+#     else:
+#         raise ValueError(
+#             "Please specify as_type argument as one of 'array' or 'tensor'"
+#         )
 
 def save_cancer_data_to_csv(output_path: str) -> None:
     """
@@ -202,3 +202,40 @@ def dataframe_to_bytesio(df: pd.DataFrame) -> BytesIO:
     df.to_csv(output, index=False)
     output.seek(0)
     return output
+
+def load_data_splits(as_type: str) -> Tuple[Union[np.ndarray, torch.Tensor]]:
+    """
+    Load train/val/test files para X y y from Azure Blob Storage.
+
+    Args:
+        datastore_manager: La instancia de AzureDatastoreManager que tiene los detalles de Azure Blob Storage.
+        as_type: (str) tipo de outputs; uno de 'array' (devuelve como numpy ndarray)
+            o 'tensor' (devuelve como pytorch tensor)
+
+    Returns:
+        (tuple) de numpy arrays o torch tensors para
+            X_train, X_val, X_test, y_train, y_val, y_test
+    """
+    imgs, y = load_cancer_data()
+    
+    # Split into train/test/val
+    X_train, X_val, X_test, y_train, y_val, y_test = split_data(X=imgs, y=y)
+
+    if as_type == "array":
+        return X_train, X_val, X_test, y_train, y_val, y_test
+
+    elif as_type == "tensor":
+        # pylint: disable=not-callable
+        X_train = torch.Tensor(X_train).float()
+        y_train = torch.Tensor(y_train).float()
+        X_val = torch.Tensor(X_val).float()
+        y_val = torch.Tensor(y_val).float()
+        X_test = torch.Tensor(X_test).float()
+        y_test = torch.Tensor(y_test).float()
+
+        return X_train, X_val, X_test, y_train, y_val, y_test
+
+    else:
+        raise ValueError(
+            "Please specify as_type argument as one of 'array' or 'tensor'"
+        )

@@ -6,6 +6,7 @@ import configparser
 import os
 
 from lab.processes.prepare_data.cancer_data import upload_dataframe_to_azure_blob
+from lab.processes.azure.storage import AzureDatastoreManager
 
 PATH_CONFIG = os.getenv("PATH_CONFIG")
 # Azure Blob Storage
@@ -21,4 +22,6 @@ DIR_DATA_PROCESSED = config["paths"]["dir_processed"]
 
 if __name__ == "__main__":
     # prepare_cancer_data(dir_output=DIR_DATA_PROCESSED)
-    upload_dataframe_to_azure_blob()
+    azure_data_connection = AzureDatastoreManager()
+    blob_name = 'breast_cancer_data.csv'
+    upload_dataframe_to_azure_blob(blob_name, azure_data_connection)

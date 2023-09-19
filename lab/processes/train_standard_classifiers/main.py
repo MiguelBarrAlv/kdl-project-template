@@ -21,14 +21,14 @@ MLFLOW_TAGS = {"git_tag": "mlflow-azure"} # NOTE: Added git_tag to MLFLOW_TAGS h
 
 if __name__ == "__main__":
 
-    ComputeManager()
-    # manager_mlflow = MLFlowManager(experiment_name=config["mlflow"]["mlflow_experiment"])
-    # manager_blob = AzureDatastoreManager()
+    # ComputeManager()
+    manager_mlflow = MLFlowManager(experiment_name=config["mlflow"]["mlflow_experiment"])
+    manager_blob = AzureDatastoreManager()
     
-    # asyncio.run(train_classifiers(
-    #     manager_mlflow=manager_mlflow,
-    #     manager_blob=manager_blob,
-    #     config=config,
-    #     mlflow_tags=MLFLOW_TAGS
-    # ))
+    asyncio.run(train_classifiers(
+        manager_mlflow=manager_mlflow,
+        manager_blob=manager_blob,
+        config=config,
+        mlflow_tags=MLFLOW_TAGS
+    ))
 

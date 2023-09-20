@@ -12,6 +12,7 @@ azure-storage-blob = "*"
 azure-ai-ml = "*"
 azureml-sdk = "*"
 python-dotenv = "*"
+aiohttp = "*"
 
 [dev-packages]
 

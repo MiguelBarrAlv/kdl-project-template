@@ -2,6 +2,7 @@ import json
 import mlflow
 
 from azureml.core import Workspace
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -37,3 +38,10 @@ class MLFlowManager():
 
     def log_metrics(self, *args, **kwargs):
         return mlflow.log_metrics(*args, **kwargs)
+
+
+def read_npy_from_blob(blob_name, blob_service_client):
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+    blob_data = blob_client.download_blob()
+    blob_content = blob_data.readall()
+    return np.load(blob_content, allow_pickle=True)

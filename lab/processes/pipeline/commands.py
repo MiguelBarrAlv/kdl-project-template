@@ -58,13 +58,16 @@ def load_data_from_blob(compute_target, ws):
         runconfig=run_config,
         allow_reuse=True
     )
-    return step, X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data
+    data = [X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data]
+    return step, data
 
 
-def train_standard_classifier(compute_target, X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data):
+def train_standard_classifier(compute_target, data):
     env = Environment.from_conda_specification(name="train_env", file_path=env_path)
     run_config = RunConfiguration()
     run_config.environment = env
+
+    X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data = data
 
     step = PythonScriptStep(
         name="train_step",
@@ -77,11 +80,13 @@ def train_standard_classifier(compute_target, X_train_data, X_val_data, X_test_d
             "--y_val_data", y_val_data,
             "--y_test_data", y_test_data
         ],
-        inputs=[X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data],
+        inputs=[X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data],  # Eliminado datastore_manager
         compute_target=compute_target,
         source_directory="./train_standard_classifiers",
         runconfig=run_config,
         allow_reuse=True
     )
     return step
+
+
 

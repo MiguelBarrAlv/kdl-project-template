@@ -60,7 +60,7 @@ def train_classifiers(
     random_seed = 0
     np.random.seed(random_seed)
  
-    with manager_mlflow.start_run(run_name="sklearn_example_train", tags=mlflow_tags):
+    with manager_mlflow.start_run(run_name="sklearn_example_train"):
 
 
         # Define a number of classifiers
@@ -69,17 +69,13 @@ def train_classifiers(
         # Iterate fitting and validation through all model types, logging results to MLflow:
         for model_name, model in models.items():
 
-            with manager_mlflow.start_run(run_name=model_name, nested=True, tags=mlflow_tags):
+            with manager_mlflow.start_run(run_name=model_name, nested=True):
                 print(f"Fitting {model_name}...")
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_val)
                 val_accuracy = accuracy_score(y_pred, y_val)
                 cm = confusion_matrix(y_val, y_pred)
-                plot_confusion_matrix(
-                    cm,
-                    normalize=False,
-                    title="Confusion matrix (validation set)",
-                )
+      
 
                 # Save MLFLow model
                 manager_mlflow.log_sklearn_model(model, "model")
@@ -89,7 +85,7 @@ def train_classifiers(
                 manager_mlflow.register_model(
                     model_name=model_name,
                     description=description,
-                    tags=mlflow_tags
+                    tags={"classifier": model_name, "random_seed": random_seed},
                 )
 
                 manager_mlflow.log_params({"classifier": random_seed})

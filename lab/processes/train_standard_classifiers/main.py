@@ -20,8 +20,6 @@ MLFLOW_URL = os.getenv("MLFLOW_URL")
 MLFLOW_TAGS = {"git_tag": "mlflow-azure"} # NOTE: Added git_tag to MLFLOW_TAGS hardcoded
 
 if __name__ == "__main__":
-
-    # ComputeManager()
     manager_mlflow = MLFlowManager(experiment_name=config["mlflow"]["mlflow_experiment"])
     manager_blob = AzureDatastoreManager()
     

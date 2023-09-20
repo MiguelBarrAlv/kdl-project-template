@@ -11,7 +11,7 @@ from train_classifiers import train_classifiers
 def main():
 
     account_name = "pockldtemplate5378781998"
-    account_key = "tZFKAhu7Um65OqqjYYCnEY6xWmV1s50jS+MMAMYNaKAWEXXeISV5HkQO4isr90vGF5fuqvFNVan0+AStGrz3Uw=="
+    account_key = ""
     container_name = "cancer-data"
 
     blob_service_client = BlobServiceClient(account_url=f"https://{account_name}.blob.core.windows.net", credential=account_key)
@@ -34,14 +34,13 @@ def main():
 
     args = parser.parse_args()
 
-    # Cargar los datos usando las corutinas
-
     X_train = read_npy_from_blob("X_train.npy")
     X_val = read_npy_from_blob("X_val.npy")
     X_test = read_npy_from_blob("X_test.npy")
     y_train = read_npy_from_blob("y_train.npy")
     y_val = read_npy_from_blob("y_val.npy")
     y_test = read_npy_from_blob("y_test.npy")
+
 
     manager_mlflow = MLFlowManager()
     train_classifiers(manager_mlflow, X_train, X_val, X_test, y_train, y_val, y_test)

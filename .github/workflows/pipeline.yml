@@ -28,6 +28,7 @@ jobs:
 
       - name: Run main.py
         run: |
+          export PYTHONPATH=${{ github.workspace }}
           cd lab/processes/pipeline
           pipenv run python main.py
 

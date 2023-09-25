@@ -4,13 +4,9 @@ from azure.storage.blob import BlobServiceClient
 from azureml.core import Experiment
 from commands import load_data_from_blob, train_standard_classifier
 from lab.processes.azure.workspace import AzureWorkspaceConnector
-from lab.processes.azure.storage import AzureDatastoreManager
 
 def main():
     azure_connector = AzureWorkspaceConnector()
-    azure_datastore_manager = AzureDatastoreManager()
-
-
     ws = azure_connector.ws
     compute_target = 'cpu-cluster'
 

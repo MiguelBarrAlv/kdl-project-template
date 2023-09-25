@@ -1,22 +1,24 @@
-import json
+import os
 
 from azureml.core import Workspace
 from dotenv import load_dotenv
-from pathlib import Path
+
 
 class AzureWorkspaceConnector:
 
-    def __init__(self, config_filename='azure.json'):
+    def __init__(self):
         load_dotenv()
 
-        current_path = Path(__file__).resolve().parent
-        config_path = current_path.parent / 'configs' / config_filename
+        # Cargar los valores desde las variables de entorno
+        subscription_id = os.getenv('SUBSCRIPTION_ID')
+        resource_group = os.getenv('RESOURCE_GROUP')
+        workspace_name = os.getenv('WORKSPACE_NAME')
 
-        if not config_path.exists():
-            raise ValueError(f"Azure config file not found: '{config_filename}'")
+        if not subscription_id or not resource_group or not workspace_name:
+            raise ValueError("Missing Azure configuration from environment variables.")
 
-        with open(config_path) as config_file:
-            config = json.load(config_file)
-            print("Azure Workspace loaded successfully.")
-        
-        self.ws = Workspace.from_config(config_path)
+        print("Azure Workspace configuration loaded from environment variables.")
+        self.ws = Workspace(subscription_id=subscription_id, 
+                            resource_group=resource_group, 
+                            workspace_name=workspace_name)
+

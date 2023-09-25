@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+torch = "==1.12.1"
+pandas = "==1.4.3"
+numpy = "==1.24.1"
+azureml-core = "*"
+azure-storage-blob = "*"
+azure-ai-ml = "*"
+azureml-sdk = "*"
+python-dotenv = "*"
+aiohttp = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
+python_full_version = "3.9.17"

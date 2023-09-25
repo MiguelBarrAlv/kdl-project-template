@@ -17,6 +17,6 @@ class AzureWorkspaceConnector:
 
         with open(config_path) as config_file:
             config = json.load(config_file)
-            print("Azure config loaded successfully.")
+            print("Azure Workspace loaded successfully.")
         
         self.ws = Workspace.from_config(config_path)

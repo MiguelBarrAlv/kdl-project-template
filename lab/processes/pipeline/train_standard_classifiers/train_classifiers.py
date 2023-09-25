@@ -27,11 +27,11 @@ def create_classifiers() -> dict:
     models = {
         "Logistic regression": LogisticRegression(),
         "Naive Bayes": GaussianNB(),
-        # "K-nearest neighbour": KNeighborsClassifier(),
-        # "Random forest": RandomForestClassifier(),
-        # "Linear SVM": SVC(kernel="linear"),
-        # "GradientBoost": GradientBoostingClassifier(),
-        # "AdaBoost": AdaBoostClassifier(),
+        "K-nearest neighbour": KNeighborsClassifier(),
+        "Random forest": RandomForestClassifier(),
+        "Linear SVM": SVC(kernel="linear"),
+        "GradientBoost": GradientBoostingClassifier(),
+        "AdaBoost": AdaBoostClassifier(),
     }
     return models
 

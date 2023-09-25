@@ -6,7 +6,7 @@ from azure.ai.ml.entities import Data
 from azure.ai.ml.constants import AssetTypes
 from azureml.pipeline.core import PipelineData
 
-root_dir = os.path.dirname(os.path.abspath(__file__))  # obtiene la ruta del directorio del script actual
+root_dir = os.path.dirname(os.path.abspath(__file__)) 
 env_path = os.path.join(root_dir, "enviroment", "environment.yaml")
 
 def get_data_upload_step(compute_target):

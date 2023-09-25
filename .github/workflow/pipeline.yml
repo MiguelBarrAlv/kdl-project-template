@@ -1,0 +1,36 @@
+name: Run model trained jobs on Azure ML
+
+on:
+  push:
+    branches:
+      - feat/azure-integration-service
+
+jobs:
+  build_and_run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Install pipenv
+        run: |
+          pip install pipenv
+
+      - name: Install dependencies with pipenv
+        run: |
+          cd lab/processes/pipeline
+          pipenv sync
+
+      - name: Run main.py
+        run: |
+          cd lab/processes/pipeline
+          pipenv run python main.py
+
+        env:
+          account_name: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+          account_key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}

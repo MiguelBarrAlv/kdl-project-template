@@ -6,7 +6,7 @@ import os
 from azureml.core import Run
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from io import BytesIO
-from manager import MLFlowManager, read_npy_from_blob
+from azure.manager import MLFlowManager, read_npy_from_blob
 from train_classifiers import train_classifiers
 
 def read_npy_from_blob(blob_name):

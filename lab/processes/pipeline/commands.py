@@ -32,8 +32,8 @@ def load_data_from_blob(compute_target, ws):
     env = Environment.from_conda_specification(name="data_load_env", file_path=env_path)
     run_config = RunConfiguration()
     run_config.environment = env
-    
 
+    # NOTE: Refactor Code: Too many connections to the same datastore
     X_train_data = PipelineData("X_train_data", datastore=ws.get_default_datastore())
     X_val_data = PipelineData("X_val_data", datastore=ws.get_default_datastore())
     X_test_data = PipelineData("X_test_data", datastore=ws.get_default_datastore())
@@ -52,6 +52,7 @@ def load_data_from_blob(compute_target, ws):
             "--y_val_data", y_val_data,
             "--y_test_data", y_test_data
         ],
+
         outputs=[X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data],
         compute_target=compute_target,
         source_directory=data_load_src_dir,
@@ -80,7 +81,7 @@ def train_standard_classifier(compute_target, data):
             "--y_val_data", y_val_data,
             "--y_test_data", y_test_data
         ],
-        inputs=[X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data],  # Eliminado datastore_manager
+        inputs=[X_train_data, X_val_data, X_test_data, y_train_data, y_val_data, y_test_data],
         compute_target=compute_target,
         source_directory="./train_standard_classifiers",
         runconfig=run_config,

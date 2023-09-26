@@ -62,7 +62,6 @@ def train_classifiers(
  
     with manager_mlflow.start_run(run_name="sklearn_example_train"):
 
-
         # Define a number of classifiers
         models = create_classifiers()
 

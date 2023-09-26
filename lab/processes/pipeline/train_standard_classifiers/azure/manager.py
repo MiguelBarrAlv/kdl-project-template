@@ -6,16 +6,16 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
 from pathlib import Path
 
-class MLFlowManager():
+class MLFlowManager(AzureWorkspaceConnector):
+
+    def __init__(self, experiment_name: str, config_filename='azure.json'):
+        super().__init__(config_filename)
+
+        self.workspace = self.ws
+
+        mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri())
+        mlflow.set_experiment(experiment_name)
     
-    # def __init__(self, experiment_name: str, config_filename='azure.json'):
-    #     super().__init__(config_filename)
-
-    #     self.workspace = self.ws
-
-    #     mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri())
-    #     mlflow.set_experiment(experiment_name)
-
     def start_run(self, *args, **kwargs):
         return mlflow.start_run(*args, **kwargs)
 

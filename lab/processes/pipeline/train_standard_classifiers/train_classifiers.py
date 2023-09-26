@@ -1,5 +1,6 @@
 import numpy as np
-from manager import MLFlowManager
+
+from azure.manager import MLFlowManager
 from configparser import ConfigParser
 from sklearn.ensemble import (
     AdaBoostClassifier,

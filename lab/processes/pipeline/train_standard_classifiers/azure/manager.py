@@ -3,6 +3,7 @@ import mlflow
 
 from azureml.core import Workspace
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.workspace import AzureWorkspaceConnector
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -45,3 +46,4 @@ def read_npy_from_blob(blob_name, blob_service_client):
     blob_data = blob_client.download_blob()
     blob_content = blob_data.readall()
     return np.load(blob_content, allow_pickle=True)
+

@@ -1,12 +1,17 @@
 import asyncio
+import os
 
 from azureml.pipeline.core import Pipeline
 from azure.storage.blob import BlobServiceClient
 from azureml.core import Experiment
 from commands import load_data_from_blob, train_standard_classifier
+from dotenv import load_dotenv
 from lab.processes.azure.workspace import AzureWorkspaceConnector
 
 def main():
+    load_dotenv()
+    print("Account", os.getenv("AZURE_STORAGE_ACCOUNT_NAME"))
+    print("Key", os.getenv("AZURE_STORAGE_ACCOUNT_KEY"))
     azure_connector = AzureWorkspaceConnector()
     ws = azure_connector.ws
     compute_target = 'cpu-cluster'

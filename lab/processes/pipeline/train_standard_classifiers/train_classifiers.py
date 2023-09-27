@@ -1,6 +1,8 @@
 import numpy as np
 
 from azure.manager import MLFlowManager
+from azureml.core.model import Model
+from azureml.core import Run
 from configparser import ConfigParser
 from sklearn.ensemble import (
     AdaBoostClassifier,
@@ -35,6 +37,15 @@ def create_classifiers() -> dict:
         "AdaBoost": AdaBoostClassifier(),
     }
     return models
+
+
+def register_model_in_azure(model, model_name):
+    run = Run.get_context()
+    model_path = f"outputs/{model_name}.pkl"
+    Model.register(workspace=run.experiment.workspace,
+                   model_path=model_path,
+                   model_name=model_name,
+                   properties={'Type': 'Classification', 'Framework': 'Scikit-learn'})
 
 
 def train_classifiers(

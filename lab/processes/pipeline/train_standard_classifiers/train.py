@@ -5,6 +5,7 @@ import os
 
 from azureml.core import Run
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from dotenv import load_dotenv
 from io import BytesIO
 from azure.manager import MLFlowManager, read_npy_from_blob
 from train_classifiers import train_classifiers
@@ -18,7 +19,8 @@ def read_npy_from_blob(blob_name):
 
 
 def get_environment_variable(var_name):
-    value = os.environ.get(var_name)
+    load_dotenv()
+    value = os.getenv(var_name)
     if not value:
         raise ValueError(f"{var_name} environment variable is not set!")
     return value
@@ -33,15 +35,14 @@ def read_data_from_blob(filename):
 
 def main():
     try:
-        ACCOUNT_NAME = get_environment_variable("account_name")
-        ACCOUNT_KEY = get_environment_variable("account_key")
+        ACCOUNT_NAME = get_environment_variable("AZURE_STORAGE_ACCOUNT_NAME")
+        ACCOUNT_KEY = get_environment_variable("AZURE_STORAGE_ACCOUNT_KEY")
 
         container_name = "cancer-data"
         blob_service_client = BlobServiceClient(account_url=f"https://{ACCOUNT_NAME}.blob.core.windows.net", credential=ACCOUNT_KEY)
-        
         parser = argparse.ArgumentParser(description="Process inputs for training.")
-
         datasets = ["X_train", "X_val", "X_test", "y_train", "y_val", "y_test"]
+
         for dataset in datasets:
             parser.add_argument(f"--{dataset}_data", type=str, required=True)
 
@@ -54,8 +55,9 @@ def main():
         y_val = read_data_from_blob(args.y_val_data)
         y_test = read_data_from_blob(args.y_test_data)
 
-        manager_mlflow = MLFlowManager()
-        train_classifiers(manager_mlflow, X_train, X_val, X_test, y_train, y_val, y_test)
+        manager_mlflow = MLFlowManager(experiment_name="sklearn_example_train")
+        print("Tracking mlstudio model: ", mlflow.get_tracking_uri())
+        model = train_classifiers(manager_mlflow, X_train, X_val, X_test, y_train, y_val, y_test)
 
     except ValueError as ve:
         print(f"Value Error: {ve}")

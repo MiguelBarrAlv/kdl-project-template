@@ -10,8 +10,7 @@ from lab.processes.azure.workspace import AzureWorkspaceConnector
 
 def main():
     load_dotenv()
-    print("Account", os.getenv("AZURE_STORAGE_ACCOUNT_NAME"))
-    print("Key", os.getenv("AZURE_STORAGE_ACCOUNT_KEY"))
+    print("Account", os.getenv("account_name"))
     azure_connector = AzureWorkspaceConnector()
     ws = azure_connector.ws
     compute_target = 'cpu-cluster'
